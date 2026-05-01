@@ -49,9 +49,8 @@ namespace QuickCommerceMLPOC
 
         static void Main(string[] args)
         {
-            var mlContext = new MLContext(seed: 123);
-
             EnsureModelTableExists();
+            var mlContext = new MLContext(seed: 123);
 
             if (ModelExistsInDatabase())
             {
@@ -72,7 +71,7 @@ namespace QuickCommerceMLPOC
         {
             var trainers = new List<(string Name, IEstimator<ITransformer> Trainer)>();
 
-            // 🔹 LightGBM tuning
+            // LightGBM tuning
             var lightGbmOptionsList = new[]
             {
         new Microsoft.ML.Trainers.LightGbm.LightGbmRegressionTrainer.Options
@@ -103,7 +102,7 @@ namespace QuickCommerceMLPOC
                 ));
             }
 
-            // 🔹 FastTree tuning
+            // FastTree tuning
             var fastTreeOptionsList = new[]
             {
         new Microsoft.ML.Trainers.FastTree.FastTreeRegressionTrainer.Options
@@ -128,7 +127,6 @@ namespace QuickCommerceMLPOC
                 ));
             }
 
-            // 🔹 SDCA (basic variations)
             var sdcaOptionsList = new[]
             {
         new Microsoft.ML.Trainers.SdcaRegressionTrainer.Options
@@ -202,7 +200,6 @@ namespace QuickCommerceMLPOC
         }
     },
 
-    // ⭐ Logistics + Ratings (quality impact)
     new { Name = "Logistics_Ratings", Features = new[]
         {
             nameof(OrderData.Distance_Km),
@@ -266,7 +263,7 @@ namespace QuickCommerceMLPOC
 
             foreach (var set in featureSets)
             {
-                foreach (var trainer in trainers)   // ✅ IMPORTANT LOOP
+                foreach (var trainer in trainers)   
                 {
                     try
                     {
@@ -281,7 +278,7 @@ namespace QuickCommerceMLPOC
 
                     Console.WriteLine($"RMSE: {metrics.RootMeanSquaredError:F4}");
                     Console.WriteLine($"MAE : {metrics.MeanAbsoluteError:F4}");
-                    Console.WriteLine($"R²  : {metrics.RSquared:F4}");
+                    Console.WriteLine($"Rsquare  : {metrics.RSquared:F4}");
 
                     // scoring
                     double rmseScore = 1.0 / (1.0 + metrics.RootMeanSquaredError);
@@ -305,7 +302,7 @@ namespace QuickCommerceMLPOC
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine($"❌ Skipping {set.Name} + {trainer.Name} → {ex.Message}");
+                        Console.WriteLine($"Skipping {set.Name} + {trainer.Name} = {ex.Message}");
                         continue;
                     }
                 }
@@ -353,7 +350,7 @@ namespace QuickCommerceMLPOC
 
             pipeline = pipeline
                 .Append(mlContext.Transforms.Concatenate("Features", featureColumns.ToArray()))
-                .Append(trainer); // ✅ dynamic trainer
+                .Append(trainer); 
 
             return pipeline;
         }
